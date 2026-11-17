@@ -45,7 +45,7 @@ use nsh_core::{
 
 /// The platforms whose props are written `<platform>.<name>` in scripts as
 /// in a script's `covers` step; the platform receives them as `<name>`.
-const PLATFORMS: &[&str] = &["ios.", "android.", "macos.", "desktop.", "web."];
+const PLATFORMS: &[&str] = &["ios.", "android.", "macos.", "windows.", "desktop.", "web."];
 
 /// The last mount item of each kind a view got: what the platform shows.
 #[derive(Default, Clone)]
@@ -286,6 +286,10 @@ impl Mounted {
                 (backdrop.state != defaults.state).then(|| backdrop.state.js_name().to_owned()),
             );
             out.put("backdrop", value.done());
+        }
+        #[cfg(nsh_has_windows_material)]
+        if let Some(material) = style.windows_material {
+            out.put("material", material.js_name().into());
         }
 
         match self.kind {
@@ -1579,6 +1583,22 @@ fn material_values_distinguish_defaults_from_removal() {
     assert_eq!(view.props()["backdrop"], "{}");
     view.style.as_mut().unwrap().macos_backdrop = None;
     assert!(!view.props().contains_key("backdrop"));
+}
+
+#[cfg(nsh_has_windows_material)]
+#[test]
+fn windows_material_values_name_the_material_and_clear() {
+    let mut view = Mounted {
+        style: Some(Box::new(ViewStyle {
+            windows_material: Some(nsh_core::WindowsMaterial::Blur),
+            ..ViewStyle::default()
+        })),
+        ..Mounted::default()
+    };
+    assert_eq!(key("windows.material"), "material");
+    assert_eq!(view.props()["material"], "blur");
+    view.style.as_mut().unwrap().windows_material = None;
+    assert!(!view.props().contains_key("material"));
 }
 
 #[cfg(nsh_has_glass_tint)]
