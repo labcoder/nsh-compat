@@ -287,6 +287,10 @@ impl Mounted {
             );
             out.put("backdrop", value.done());
         }
+        #[cfg(nsh_has_windows_backdrop)]
+        if let Some(backdrop) = style.windows_backdrop {
+            out.put("windows.backdrop", backdrop.js_name().into());
+        }
 
         match self.kind {
             Some(ViewKind::Image) => {
@@ -745,7 +749,7 @@ impl Mounted {
 
 /// The key a script's `name` reads: a platform's props are named with
 /// their platform (`ios.keyboardAppearance`) or without, and a few keys
-/// have a second JS name.
+/// have a second JS name. Windows backdrop keeps its platform qualifier.
 pub(crate) fn key(name: &str) -> &str {
     let name = PLATFORMS
         .iter()
@@ -1581,6 +1585,23 @@ fn material_values_distinguish_defaults_from_removal() {
     assert_eq!(view.props()["backdrop"], "{}");
     view.style.as_mut().unwrap().macos_backdrop = None;
     assert!(!view.props().contains_key("backdrop"));
+}
+
+#[cfg(nsh_has_windows_backdrop)]
+#[test]
+fn windows_backdrop_values_set_and_clear() {
+    let mut view = Mounted {
+        style: Some(Box::new(ViewStyle {
+            windows_backdrop: Some(nsh_core::WindowsBackdrop::Blur),
+            ..ViewStyle::default()
+        })),
+        ..Mounted::default()
+    };
+    assert_eq!(key("windows.backdrop"), "windows.backdrop");
+    assert_eq!(view.props()[key("windows.backdrop")], "blur");
+    assert!(!view.props().contains_key(key("macos.backdrop")));
+    view.style.as_mut().unwrap().windows_backdrop = None;
+    assert!(!view.props().contains_key(key("windows.backdrop")));
 }
 
 #[cfg(nsh_has_glass_tint)]

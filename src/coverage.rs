@@ -94,6 +94,7 @@ const PLATFORMS: &[(&str, &str)] = &[
     ("IOS", "ios"),
     ("Android", "android"),
     ("MacOS", "macos"),
+    ("Windows", "windows"),
     ("Desktop", "desktop"),
     ("Web", "web"),
 ];

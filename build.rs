@@ -3,6 +3,7 @@ use nsh_core::{Prop, Style, StyleValue, element::TsTypes, js::host::HostProps};
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rustc-check-cfg=cfg(nsh_has_macos_backdrop)");
+    println!("cargo:rustc-check-cfg=cfg(nsh_has_windows_backdrop)");
     println!("cargo:rustc-check-cfg=cfg(nsh_has_glass_tint)");
     println!("cargo:rustc-check-cfg=cfg(nsh_has_window_controls)");
     println!("cargo:rustc-check-cfg=cfg(nsh_has_web_element)");
@@ -13,8 +14,17 @@ fn main() {
     // fields, so detect the public API before referring to their Rust fields.
     let mut specs = Vec::new();
     Prop::specs(&mut TsTypes::default(), &mut specs);
-    if specs.iter().any(|spec| spec.name == "backdrop") {
+    if specs
+        .iter()
+        .any(|spec| spec.name == "backdrop" && format!("{:?}", spec.platform) == "Macos")
+    {
         println!("cargo:rustc-cfg=nsh_has_macos_backdrop");
+    }
+    if specs
+        .iter()
+        .any(|spec| spec.name == "backdrop" && format!("{:?}", spec.platform) == "Windows")
+    {
+        println!("cargo:rustc-cfg=nsh_has_windows_backdrop");
     }
     if specs.iter().any(|spec| spec.name == "windowControl") {
         println!("cargo:rustc-cfg=nsh_has_window_controls");
