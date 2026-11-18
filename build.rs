@@ -23,6 +23,7 @@ fn main() {
     if specs
         .iter()
         .any(|spec| spec.name == "backdrop" && format!("{:?}", spec.platform) == "Windows")
+        && nsh_core::js::host::declarations().contains("export interface WindowsBackdrop {")
     {
         println!("cargo:rustc-cfg=nsh_has_windows_backdrop");
     }

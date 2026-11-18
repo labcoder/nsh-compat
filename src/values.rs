@@ -289,7 +289,10 @@ impl Mounted {
         }
         #[cfg(nsh_has_windows_backdrop)]
         if let Some(backdrop) = style.windows_backdrop {
-            out.put("windows.backdrop", backdrop.js_name().into());
+            out.put(
+                "windows.backdrop",
+                format!("material={}", backdrop.material.js_name()),
+            );
         }
 
         match self.kind {
@@ -1592,13 +1595,13 @@ fn material_values_distinguish_defaults_from_removal() {
 fn windows_backdrop_values_set_and_clear() {
     let mut view = Mounted {
         style: Some(Box::new(ViewStyle {
-            windows_backdrop: Some(nsh_core::WindowsBackdrop::Blur),
+            windows_backdrop: Some(nsh_core::WindowsBackdrop::default()),
             ..ViewStyle::default()
         })),
         ..Mounted::default()
     };
     assert_eq!(key("windows.backdrop"), "windows.backdrop");
-    assert_eq!(view.props()[key("windows.backdrop")], "blur");
+    assert_eq!(view.props()[key("windows.backdrop")], "material=blur");
     assert!(!view.props().contains_key(key("macos.backdrop")));
     view.style.as_mut().unwrap().windows_backdrop = None;
     assert!(!view.props().contains_key(key("windows.backdrop")));
